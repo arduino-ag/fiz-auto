@@ -17,11 +17,35 @@ void setup()
 
 void loop()
 {
+    /*
     if (distance() > 20) {
         set_speed(255/3, 0);
     } else {
         set_speed(0, 0);
     }
+    */
+   right_turn();
+   delay(1000);
+}
+
+void right_turn() {
+    analogWrite(RIGHT, 255/3.5);
+    analogWrite(RIGHT_BACK, 0);
+    analogWrite(LEFT, 0);
+    analogWrite(LEFT_BACK, 255/3.5);
+    delay(500);
+    analogWrite(RIGHT, 0);
+    analogWrite(LEFT_BACK, 0);
+}
+
+void left_turn() {
+    analogWrite(RIGHT, 0);
+    analogWrite(RIGHT_BACK, 255/3);
+    analogWrite(LEFT, 255/3);
+    analogWrite(LEFT_BACK, 0);
+    delay(500);
+    analogWrite(LEFT, 0);
+    analogWrite(RIGHT_BACK, 0);
 }
 
 void set_speed(int speed, int direction)
