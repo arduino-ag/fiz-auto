@@ -1,54 +1,96 @@
 #define TRIGGER 2
-#define LEFT_BACK 3
-#define ECHO 4
-#define LEFT 5
+#define ECHO 3
+#define RIGHT_INDICATOR 4
+#define RIGHT_BACK 5
 #define RIGHT 6
-#define RIGHT_BACK 9
+#define LEFT 9
+#define LEFT_BACK 10
+#define FRONTLIGHT 11
+#define LEFT_INDICATOR 12
+#define BACKLIGHT 13
+
+void right_turn();
+void left_turn();
+void indicator(int count, uint8_t light);
+void set_speed(int speed);
+long distance();
 
 void setup()
 {
-    pinMode(TRIGGER, OUTPUT);
-    pinMode(LEFT_BACK, OUTPUT);
-    pinMode(ECHO, INPUT);
-    pinMode(LEFT, OUTPUT);
+    Serial.begin(115200);
+
+    // Motors
     pinMode(RIGHT, OUTPUT);
     pinMode(RIGHT_BACK, OUTPUT);
+    pinMode(LEFT, OUTPUT);
+    pinMode(LEFT_BACK, OUTPUT);
+
+    // ultrasonic sensor
+    pinMode(TRIGGER, OUTPUT);
+    pinMode(ECHO, INPUT);
+
+    // car lights
+    pinMode(RIGHT_INDICATOR, OUTPUT);
+    pinMode(FRONTLIGHT, OUTPUT);
+    pinMode(LEFT_INDICATOR, OUTPUT);
+    pinMode(BACKLIGHT, OUTPUT);
+
+    digitalWrite(FRONTLIGHT, HIGH);
 }
 
 void loop()
 {
-    /*
-    if (distance() > 20) {
-        set_speed(255/3, 0);
-    } else {
-        set_speed(0, 0);
+    long dis = distance();
+
+    if (dis < 21)
+    {
+        digitalWrite(BACKLIGHT, HIGH);
+        set_speed(0);
+        delay(100);
+        digitalWrite(BACKLIGHT, LOW);
+        indicator(5, RIGHT_INDICATOR);
+        right_turn();
+        delay(500);
     }
-    */
-   right_turn();
-   delay(1000);
+    else
+    {
+        set_speed(255 / 3);
+    }
 }
 
-void right_turn() {
-    analogWrite(RIGHT, 255/3.5);
+void right_turn()
+{
+    analogWrite(RIGHT, 255 / 3.5);
     analogWrite(RIGHT_BACK, 0);
     analogWrite(LEFT, 0);
-    analogWrite(LEFT_BACK, 255/3.5);
+    analogWrite(LEFT_BACK, 255 / 3.5);
     delay(500);
     analogWrite(RIGHT, 0);
     analogWrite(LEFT_BACK, 0);
 }
 
-void left_turn() {
+void left_turn()
+{
     analogWrite(RIGHT, 0);
-    analogWrite(RIGHT_BACK, 255/3);
-    analogWrite(LEFT, 255/3);
+    analogWrite(RIGHT_BACK, 255 / 3);
+    analogWrite(LEFT, 255 / 3);
     analogWrite(LEFT_BACK, 0);
     delay(500);
     analogWrite(LEFT, 0);
     analogWrite(RIGHT_BACK, 0);
 }
 
-void set_speed(int speed, int direction)
+void indicator(int count, uint8_t light)
+{
+    for (int i = 0; i < count; i++) {
+        digitalWrite(light, HIGH);
+        delay(500);
+        digitalWrite(light, LOW);
+        delay(500);
+    }
+}
+
+void set_speed(int speed)
 {
     if (speed < 0)
     {
