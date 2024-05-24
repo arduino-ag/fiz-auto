@@ -19,4 +19,4 @@ A programm for using a two-motor car with a bluetooth modul and a ultrasonic sen
 
 ## license
 
-This project is licensed under the CC-BY-4.0 See [LICENSE](https://github.com/arduino-ag/fiz-auto/blob/development/LICENSE).
+This project is licensed under the CC-BY-4.0. For more information see [LICENSE](https://github.com/arduino-ag/fiz-auto/blob/development/LICENSE).
