@@ -103,20 +103,23 @@ void loop()
     else if (GamePad.isSelectPressed())
     {
     }
-    else 
+    else
     {
         set_speed(0);
     }
 
-    if (dist < 20) {
+    if (dist < 20)
+    {
         set_speed(0);
         alert_indicator();
     }
 }
 
-void startup() {
+void startup()
+{
     delay(300);
-    for (int i = 0; i < 5; i++) {
+    for (int i = 0; i < 5; i++)
+    {
         frontlight = !frontlight;
         update_light();
         delay(200);
@@ -151,19 +154,6 @@ void set_speed(int speed)
     }
 }
 
-void left_turn()
-{
-    analogWrite(RIGHT, 255 / 3.5);
-    analogWrite(RIGHT_BACK, 0);
-    analogWrite(LEFT, 0);
-    analogWrite(LEFT_BACK, 255 / 3.5);
-
-    digitalWrite(INDICATOR_LEFT, HIGH);
-    delay(INDICATOR_DELAY);
-    digitalWrite(INDICATOR_LEFT, LOW);
-    delay(INDICATOR_DELAY);
-}
-
 void right_turn()
 {
     analogWrite(RIGHT, 0);
@@ -177,16 +167,19 @@ void right_turn()
     delay(INDICATOR_DELAY);
 }
 
-long distance()
+void left_turn()
 {
-    digitalWrite(TRIGGER, LOW);
-    delay(5);
-    digitalWrite(TRIGGER, HIGH);
-    delay(10);
-    digitalWrite(TRIGGER, LOW);
-    int duration = pulseIn(ECHO, HIGH);
-    return (duration / 2) * 0.03432;
+    analogWrite(RIGHT, 255 / 3.5);
+    analogWrite(RIGHT_BACK, 0);
+    analogWrite(LEFT, 0);
+    analogWrite(LEFT_BACK, 255 / 3.5);
+
+    digitalWrite(INDICATOR_LEFT, HIGH);
+    delay(INDICATOR_DELAY);
+    digitalWrite(INDICATOR_LEFT, LOW);
+    delay(INDICATOR_DELAY);
 }
+
 
 void update_light()
 {
@@ -222,4 +215,15 @@ void alert_indicator()
         digitalWrite(RIGHT_LIGHT, HIGH);
         digitalWrite(LEFT_LIGHT, HIGH);
     }
+}
+
+long distance()
+{
+    digitalWrite(TRIGGER, LOW);
+    delay(5);
+    digitalWrite(TRIGGER, HIGH);
+    delay(10);
+    digitalWrite(TRIGGER, LOW);
+    int duration = pulseIn(ECHO, HIGH);
+    return (duration / 2) * 0.03432;
 }
