@@ -1,23 +1,40 @@
-#define TRIGGER 2
-#define ECHO 3
-#define RIGHT_INDICATOR 4
-#define RIGHT_BACK 5
-#define RIGHT 6
-#define LEFT 9
-#define LEFT_BACK 10
-#define FRONTLIGHT 11
-#define LEFT_INDICATOR 12
-#define BACKLIGHT 13
+#define LEFT_BACK 5
+#define LEFT 6
+#define RIGHT_BACK 9
+#define RIGHT 10
 
+#define TRIGGER 7
+#define ECHO 11
+
+#define INDICATOR_RIGHT 4
+#define INDICATOR_LEFT 8
+#define BACKLIGHT A2
+#define RIGHT_LIGHT A4
+#define LEFT_LIGHT A5
+
+#define INDICATOR_DELAY 300
+
+#define CUSTOM_SETTINGS
+#define INCLUDE_GAMEPAD_MODULE
+#include <Dabble.h>
+
+static bool backlight = false;
+static bool frontlight = false;
+
+void startup();
+void set_speed(int speed);
 void right_turn();
 void left_turn();
-void indicator(int count, uint8_t light);
-void set_speed(int speed);
+void set_light(bool status);
+void set_frontlight(bool status);
+void update_light();
+void alert_indicator();
 long distance();
 
 void setup()
 {
     Serial.begin(115200);
+    Dabble.begin(9600);
 
     // Motors
     pinMode(RIGHT, OUTPUT);
@@ -25,68 +42,87 @@ void setup()
     pinMode(LEFT, OUTPUT);
     pinMode(LEFT_BACK, OUTPUT);
 
-    // ultrasonic sensor
-    pinMode(TRIGGER, OUTPUT);
-    pinMode(ECHO, INPUT);
-
-    // car lights
-    pinMode(RIGHT_INDICATOR, OUTPUT);
-    pinMode(FRONTLIGHT, OUTPUT);
-    pinMode(LEFT_INDICATOR, OUTPUT);
+    // light
+    pinMode(INDICATOR_RIGHT, OUTPUT);
+    pinMode(INDICATOR_LEFT, OUTPUT);
     pinMode(BACKLIGHT, OUTPUT);
+    pinMode(RIGHT_LIGHT, OUTPUT);
+    pinMode(LEFT_LIGHT, OUTPUT);
 
-    digitalWrite(FRONTLIGHT, HIGH);
+    Dabble.processInput();
+    while (!GamePad.isStartPressed())
+    {
+        alert_indicator();
+    }
 }
 
 void loop()
 {
-    long dis = distance();
+    Dabble.processInput();
+    long dist = distance();
 
-    if (dis < 21)
+    if (GamePad.isUpPressed())
     {
-        digitalWrite(BACKLIGHT, HIGH);
-        set_speed(0);
-        delay(100);
-        digitalWrite(BACKLIGHT, LOW);
-        indicator(5, RIGHT_INDICATOR);
+        set_speed(100);
+    }
+    else if (GamePad.isDownPressed())
+    {
+        set_speed(-100);
+    }
+    else if (GamePad.isLeftPressed())
+    {
+        left_turn();
+    }
+    else if (GamePad.isRightPressed())
+    {
         right_turn();
-        delay(500);
     }
-    else
+    else if (GamePad.isCrossPressed())
     {
-        set_speed(255 / 3);
+    }
+    else if (GamePad.isCirclePressed())
+    {
+        backlight = !backlight;
+        frontlight = !frontlight;
+        update_light();
+        delay(300);
+    }
+    else if (GamePad.isTrianglePressed())
+    {
+        alert_indicator();
+    }
+    else if (GamePad.isSquarePressed())
+    {
+        set_speed(-100);
+        delay(300);
+        set_speed(0);
+    }
+    else if (GamePad.isStartPressed())
+    {
+    }
+    else if (GamePad.isSelectPressed())
+    {
+    }
+    else 
+    {
+        set_speed(0);
+    }
+
+    if (dist < 20) {
+        set_speed(0);
+        alert_indicator();
     }
 }
 
-void right_turn()
-{
-    analogWrite(RIGHT, 255 / 3.5);
-    analogWrite(RIGHT_BACK, 0);
-    analogWrite(LEFT, 0);
-    analogWrite(LEFT_BACK, 255 / 3.5);
-    delay(500);
-    analogWrite(RIGHT, 0);
-    analogWrite(LEFT_BACK, 0);
-}
-
-void left_turn()
-{
-    analogWrite(RIGHT, 0);
-    analogWrite(RIGHT_BACK, 255 / 3);
-    analogWrite(LEFT, 255 / 3);
-    analogWrite(LEFT_BACK, 0);
-    delay(500);
-    analogWrite(LEFT, 0);
-    analogWrite(RIGHT_BACK, 0);
-}
-
-void indicator(int count, uint8_t light)
-{
-    for (int i = 0; i < count; i++) {
-        digitalWrite(light, HIGH);
-        delay(500);
-        digitalWrite(light, LOW);
-        delay(500);
+void startup() {
+    delay(300);
+    for (int i = 0; i < 5; i++) {
+        frontlight = !frontlight;
+        update_light();
+        delay(200);
+        frontlight = !frontlight;
+        update_light();
+        delay(200);
     }
 }
 
@@ -97,13 +133,13 @@ void set_speed(int speed)
         analogWrite(RIGHT, 0);
         analogWrite(RIGHT_BACK, abs(speed));
         analogWrite(LEFT, 0);
-        analogWrite(LEFT_BACK, abs(speed) - abs(speed) / 10);
+        analogWrite(LEFT_BACK, abs(speed) - abs(speed) / 11);
     }
     else if (speed > 0)
     {
         analogWrite(RIGHT, speed);
         analogWrite(RIGHT_BACK, 0);
-        analogWrite(LEFT, speed - speed / 10);
+        analogWrite(LEFT, speed - speed / 11);
         analogWrite(LEFT_BACK, 0);
     }
     else
@@ -115,6 +151,32 @@ void set_speed(int speed)
     }
 }
 
+void left_turn()
+{
+    analogWrite(RIGHT, 255 / 3.5);
+    analogWrite(RIGHT_BACK, 0);
+    analogWrite(LEFT, 0);
+    analogWrite(LEFT_BACK, 255 / 3.5);
+
+    digitalWrite(INDICATOR_LEFT, HIGH);
+    delay(INDICATOR_DELAY);
+    digitalWrite(INDICATOR_LEFT, LOW);
+    delay(INDICATOR_DELAY);
+}
+
+void right_turn()
+{
+    analogWrite(RIGHT, 0);
+    analogWrite(RIGHT_BACK, 255 / 3.5);
+    analogWrite(LEFT, 255 / 3.5);
+    analogWrite(LEFT_BACK, 0);
+
+    digitalWrite(INDICATOR_RIGHT, HIGH);
+    delay(INDICATOR_DELAY);
+    digitalWrite(INDICATOR_RIGHT, LOW);
+    delay(INDICATOR_DELAY);
+}
+
 long distance()
 {
     digitalWrite(TRIGGER, LOW);
@@ -122,8 +184,42 @@ long distance()
     digitalWrite(TRIGGER, HIGH);
     delay(10);
     digitalWrite(TRIGGER, LOW);
-
     int duration = pulseIn(ECHO, HIGH);
-
     return (duration / 2) * 0.03432;
+}
+
+void update_light()
+{
+    digitalWrite(BACKLIGHT, backlight);
+
+    digitalWrite(LEFT_LIGHT, frontlight);
+    digitalWrite(RIGHT_LIGHT, frontlight);
+}
+
+void alert_indicator()
+{
+    while (GamePad.isTrianglePressed())
+    {
+        if (frontlight)
+        {
+            digitalWrite(LEFT_LIGHT, LOW);
+            digitalWrite(RIGHT_LIGHT, LOW);
+        }
+
+        delay(INDICATOR_DELAY);
+        digitalWrite(INDICATOR_LEFT, HIGH);
+        digitalWrite(INDICATOR_RIGHT, HIGH);
+        delay(INDICATOR_DELAY);
+        digitalWrite(INDICATOR_LEFT, LOW);
+        digitalWrite(INDICATOR_RIGHT, LOW);
+        delay(INDICATOR_DELAY);
+
+        Dabble.processInput();
+    }
+
+    if (frontlight)
+    {
+        digitalWrite(RIGHT_LIGHT, HIGH);
+        digitalWrite(LEFT_LIGHT, HIGH);
+    }
 }
