@@ -25,8 +25,6 @@ void startup();
 void set_speed(int speed);
 void right_turn();
 void left_turn();
-void set_light(bool status);
-void set_frontlight(bool status);
 void update_light();
 void alert_indicator();
 long distance();
