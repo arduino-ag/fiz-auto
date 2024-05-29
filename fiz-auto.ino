@@ -27,11 +27,12 @@ void right_turn();
 void left_turn();
 void update_light();
 void alert_indicator();
+void start_indicator();
 long distance();
 
 void setup()
 {
-    Serial.begin(115200);
+    Serial.begin(19200);
     Dabble.begin(9600);
 
     // Motors
@@ -50,6 +51,7 @@ void setup()
     Dabble.processInput();
     while (!GamePad.isStartPressed())
     {
+        Dabble.processInput();
         alert_indicator();
     }
 }
@@ -178,7 +180,6 @@ void left_turn()
     delay(INDICATOR_DELAY);
 }
 
-
 void update_light()
 {
     digitalWrite(BACKLIGHT, backlight);
@@ -213,6 +214,17 @@ void alert_indicator()
         digitalWrite(RIGHT_LIGHT, HIGH);
         digitalWrite(LEFT_LIGHT, HIGH);
     }
+}
+
+void start_indicator()
+{
+    delay(INDICATOR_DELAY);
+    digitalWrite(INDICATOR_LEFT, HIGH);
+    digitalWrite(INDICATOR_RIGHT, HIGH);
+    delay(INDICATOR_DELAY);
+    digitalWrite(INDICATOR_LEFT, LOW);
+    digitalWrite(INDICATOR_RIGHT, LOW);
+    delay(INDICATOR_DELAY);
 }
 
 long distance()
