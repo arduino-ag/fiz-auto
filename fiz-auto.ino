@@ -52,7 +52,7 @@ void setup()
     while (!GamePad.isStartPressed())
     {
         Dabble.processInput();
-        alert_indicator();
+        start_indicator();
     }
 }
 
