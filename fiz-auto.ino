@@ -3,9 +3,6 @@
 #define RIGHT_BACK 9
 #define RIGHT 10
 
-#define TRIGGER 7
-#define ECHO 11
-
 #define INDICATOR_RIGHT 4
 #define INDICATOR_LEFT 8
 #define BACKLIGHT A2
@@ -13,6 +10,7 @@
 #define LEFT_LIGHT A5
 
 #define INDICATOR_DELAY 300
+#define TURN_SPEED 70
 
 #define CUSTOM_SETTINGS
 #define INCLUDE_GAMEPAD_MODULE
@@ -28,7 +26,6 @@ void left_turn();
 void update_light();
 void alert_indicator();
 void start_indicator();
-long distance();
 
 void setup()
 {
@@ -59,15 +56,14 @@ void setup()
 void loop()
 {
     Dabble.processInput();
-    long dist = distance();
 
     if (GamePad.isUpPressed())
     {
-        set_speed(100);
+        set_speed(255);
     }
     else if (GamePad.isDownPressed())
     {
-        set_speed(-100);
+        set_speed(-255);
     }
     else if (GamePad.isLeftPressed())
     {
@@ -107,12 +103,6 @@ void loop()
     {
         set_speed(0);
     }
-
-    if (dist < 20)
-    {
-        set_speed(0);
-        alert_indicator();
-    }
 }
 
 void startup()
@@ -136,13 +126,13 @@ void set_speed(int speed)
         analogWrite(RIGHT, 0);
         analogWrite(RIGHT_BACK, abs(speed));
         analogWrite(LEFT, 0);
-        analogWrite(LEFT_BACK, abs(speed) - abs(speed) / 11);
+        analogWrite(LEFT_BACK, abs(speed));
     }
     else if (speed > 0)
     {
         analogWrite(RIGHT, speed);
         analogWrite(RIGHT_BACK, 0);
-        analogWrite(LEFT, speed - speed / 11);
+        analogWrite(LEFT, speed);
         analogWrite(LEFT_BACK, 0);
     }
     else
@@ -157,9 +147,9 @@ void set_speed(int speed)
 void right_turn()
 {
     analogWrite(RIGHT, 0);
-    analogWrite(RIGHT_BACK, 255 / 3.5);
-    analogWrite(LEFT, 255 / 3.5);
-    analogWrite(LEFT_BACK, 0);
+    analogWrite(RIGHT_BACK, TURN_SPEED);
+    analogWrite(LEFT, 70);
+    analogWrite(LEFT_BACK, TURN_SPEED);
 
     digitalWrite(INDICATOR_RIGHT, HIGH);
     delay(INDICATOR_DELAY);
@@ -169,10 +159,10 @@ void right_turn()
 
 void left_turn()
 {
-    analogWrite(RIGHT, 255 / 3.5);
+    analogWrite(RIGHT, TURN_SPEED);
     analogWrite(RIGHT_BACK, 0);
     analogWrite(LEFT, 0);
-    analogWrite(LEFT_BACK, 255 / 3.5);
+    analogWrite(LEFT_BACK, TURN_SPEED);
 
     digitalWrite(INDICATOR_LEFT, HIGH);
     delay(INDICATOR_DELAY);
@@ -225,15 +215,4 @@ void start_indicator()
     digitalWrite(INDICATOR_LEFT, LOW);
     digitalWrite(INDICATOR_RIGHT, LOW);
     delay(INDICATOR_DELAY);
-}
-
-long distance()
-{
-    digitalWrite(TRIGGER, LOW);
-    delay(5);
-    digitalWrite(TRIGGER, HIGH);
-    delay(10);
-    digitalWrite(TRIGGER, LOW);
-    int duration = pulseIn(ECHO, HIGH);
-    return (duration / 2) * 0.03432;
 }
