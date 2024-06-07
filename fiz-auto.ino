@@ -10,7 +10,7 @@
 #define LEFT_LIGHT A5
 
 #define INDICATOR_DELAY 300
-#define TURN_SPEED 70
+#define TURN_SPEED 85
 
 #define CUSTOM_SETTINGS
 #define INCLUDE_GAMEPAD_MODULE
@@ -67,11 +67,21 @@ void loop()
     }
     else if (GamePad.isLeftPressed())
     {
-        left_turn();
+        while (GamePad.isLeftPressed()) {
+            Dabble.processInput();
+            digitalWrite(LEFT_LIGHT, LOW);
+            left_turn();
+            update_light();
+        }
     }
     else if (GamePad.isRightPressed())
     {
-        right_turn();
+        while (GamePad.isRightPressed()) {
+            Dabble.processInput();
+            digitalWrite(RIGHT_LIGHT, LOW);
+            right_turn();
+            update_light();
+        }
     }
     else if (GamePad.isCrossPressed())
     {
@@ -148,8 +158,8 @@ void right_turn()
 {
     analogWrite(RIGHT, 0);
     analogWrite(RIGHT_BACK, TURN_SPEED);
-    analogWrite(LEFT, 70);
-    analogWrite(LEFT_BACK, TURN_SPEED);
+    analogWrite(LEFT, TURN_SPEED);
+    analogWrite(LEFT_BACK, 0);
 
     digitalWrite(INDICATOR_RIGHT, HIGH);
     delay(INDICATOR_DELAY);
