@@ -60,6 +60,7 @@ void loop()
 {
     Dabble.processInput();
 
+<<<<<<< HEAD
     if (GamePad.isUpPressed())
     {
         set_speed(255);
@@ -89,6 +90,14 @@ void loop()
         }
     }
     else if (GamePad.isCrossPressed())
+=======
+    float x = GamePad.getx_axis();
+    float y = GamePad.gety_axis();
+
+    drive(y, x);
+
+    if (GamePad.isCrossPressed())
+>>>>>>> a415d9b51ffeb469964968dfa9db62825c9d786e
     {
     }
     else if (GamePad.isCirclePressed())
