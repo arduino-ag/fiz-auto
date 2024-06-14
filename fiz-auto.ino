@@ -16,6 +16,8 @@
 #define INCLUDE_GAMEPAD_MODULE
 #include <Dabble.h>
 
+#define sgn(x) ((x) < 0 ? -1 : ((x) > 0 ? 1 : 0))
+
 static bool backlight = false;
 static bool frontlight = false;
 
@@ -26,6 +28,7 @@ void left_turn();
 void update_light();
 void alert_indicator();
 void start_indicator();
+void drive(float x, float y);
 
 void setup()
 {
@@ -57,7 +60,9 @@ void loop()
 {
     Dabble.processInput();
 
-    if (GamePad.isUpPressed())
+    if (GamePad.getXaxisData() != 0.0 || GamePad.getYaxisData() != 0.0) {
+        drive(GamePad.getYaxisData(), GamePad.getXaxisData());
+    } else if (GamePad.isUpPressed())
     {
         set_speed(255);
     }
@@ -291,4 +296,66 @@ void start_indicator()
     digitalWrite(INDICATOR_LEFT, LOW);
     digitalWrite(INDICATOR_RIGHT, LOW);
     delay(INDICATOR_DELAY);
+}
+
+void drive(float x, float y)
+{
+    int speed = map(abs(x) * 100, 0, 700, 0, 255);
+    int steering = map(abs(x) * 100, 0, 700, 0, 255);
+
+    if (sgn(x) == -1)
+    {
+        if (y == 0.0)
+        {
+            analogWrite(RIGHT, 0);
+            analogWrite(RIGHT_BACK, speed);
+            analogWrite(LEFT, 0);
+            analogWrite(LEFT_BACK, speed);
+        }
+        else if (sgn(y) == -1)
+        {
+            analogWrite(RIGHT, 0);
+            analogWrite(RIGHT_BACK, speed - steering);
+            analogWrite(LEFT, 0);
+            analogWrite(LEFT_BACK, speed);
+        }
+        else if (sgn(y) == 1)
+        {
+            analogWrite(RIGHT, 0);
+            analogWrite(RIGHT_BACK, speed);
+            analogWrite(LEFT, 0);
+            analogWrite(LEFT_BACK, speed - steering);
+        }
+    }
+    else if (sgn(x) == 1)
+    {
+        if (y == 0.0)
+        {
+            analogWrite(RIGHT, speed);
+            analogWrite(RIGHT_BACK, 0);
+            analogWrite(LEFT, speed);
+            analogWrite(LEFT_BACK, 0);
+        }
+        else if (sgn(y) == -1)
+        {
+            analogWrite(RIGHT, speed - steering);
+            analogWrite(RIGHT_BACK, 0);
+            analogWrite(LEFT, speed);
+            analogWrite(LEFT_BACK, 0);
+        }
+        else if (sgn(y) == 1)
+        {
+            analogWrite(RIGHT, speed);
+            analogWrite(RIGHT_BACK, 0);
+            analogWrite(LEFT, speed - steering);
+            analogWrite(LEFT_BACK, 0);
+        }
+    }
+    else
+    {
+        analogWrite(RIGHT, 0);
+        analogWrite(RIGHT_BACK, 0);
+        analogWrite(LEFT, 0);
+        analogWrite(LEFT_BACK, 0);
+    }
 }
