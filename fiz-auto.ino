@@ -9,8 +9,8 @@
 #define RIGHT_LIGHT A4
 #define LEFT_LIGHT A5
 
-#define INDICATOR_DELAY 300
-#define TURN_SPEED 85
+#define INDICATOR_DELAY 200
+#define TURN_SPEED 70
 
 #define CUSTOM_SETTINGS
 #define INCLUDE_GAMEPAD_MODULE
@@ -67,7 +67,8 @@ void loop()
     }
     else if (GamePad.isLeftPressed())
     {
-        while (GamePad.isLeftPressed()) {
+        while (GamePad.isLeftPressed())
+        {
             Dabble.processInput();
             digitalWrite(LEFT_LIGHT, LOW);
             left_turn();
@@ -76,7 +77,8 @@ void loop()
     }
     else if (GamePad.isRightPressed())
     {
-        while (GamePad.isRightPressed()) {
+        while (GamePad.isRightPressed())
+        {
             Dabble.processInput();
             digitalWrite(RIGHT_LIGHT, LOW);
             right_turn();
@@ -161,10 +163,42 @@ void right_turn()
     analogWrite(LEFT, TURN_SPEED);
     analogWrite(LEFT_BACK, 0);
 
-    digitalWrite(INDICATOR_RIGHT, HIGH);
-    delay(INDICATOR_DELAY);
+    while (GamePad.isRightPressed())
+    {
+        Dabble.processInput();
+
+        digitalWrite(INDICATOR_RIGHT, HIGH);
+        delay(INDICATOR_DELAY / 2);
+
+        if (!GamePad.isRightPressed())
+            break;
+
+        Dabble.processInput();
+
+        delay(INDICATOR_DELAY / 2);
+
+        if (!GamePad.isRightPressed())
+            break;
+
+        Dabble.processInput();
+
+        if (!GamePad.isRightPressed())
+            break;
+
+        digitalWrite(INDICATOR_RIGHT, LOW);
+        delay(INDICATOR_DELAY / 2);
+
+        Dabble.processInput();
+
+        delay(INDICATOR_DELAY / 2);
+
+        if (!GamePad.isRightPressed())
+            break;
+
+        Dabble.processInput();
+    }
+
     digitalWrite(INDICATOR_RIGHT, LOW);
-    delay(INDICATOR_DELAY);
 }
 
 void left_turn()
@@ -174,10 +208,42 @@ void left_turn()
     analogWrite(LEFT, 0);
     analogWrite(LEFT_BACK, TURN_SPEED);
 
-    digitalWrite(INDICATOR_LEFT, HIGH);
-    delay(INDICATOR_DELAY);
+    while (GamePad.isLeftPressed())
+    {
+        Dabble.processInput();
+
+        digitalWrite(INDICATOR_LEFT, HIGH);
+        delay(INDICATOR_DELAY / 2);
+
+        if (!GamePad.isLeftPressed())
+            break;
+
+        Dabble.processInput();
+
+        delay(INDICATOR_DELAY / 2);
+
+        if (!GamePad.isLeftPressed())
+            break;
+
+        Dabble.processInput();
+
+        if (!GamePad.isLeftPressed())
+            break;
+
+        digitalWrite(INDICATOR_LEFT, LOW);
+        delay(INDICATOR_DELAY / 2);
+
+        Dabble.processInput();
+
+        delay(INDICATOR_DELAY / 2);
+
+        if (!GamePad.isLeftPressed())
+            break;
+
+        Dabble.processInput();
+    }
+
     digitalWrite(INDICATOR_LEFT, LOW);
-    delay(INDICATOR_DELAY);
 }
 
 void update_light()
