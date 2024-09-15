@@ -10,7 +10,7 @@ build: create-build-dir
 
 create-build-dir:
 	mkdir -p ./build/
-	mkdir -p ./build-cache/
+	mkdir -p ./build/cache/
 
 clean:
 	-rm -r ./build/
