@@ -5,7 +5,7 @@
 upload: build
 	arduino-cli upload -b arduino:avr:uno -p /dev/ttyUSB0 --input-dir ./build/ .
 
-build: create-build-dir
+build: create-build-dir fiz-auto.ino
 	arduino-cli compile -b arduino:avr:uno --build-cache-path ./build/cache/ --build-path ./build/ ./fiz-auto.ino
 
 create-build-dir:
