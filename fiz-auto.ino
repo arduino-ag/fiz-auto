@@ -14,7 +14,7 @@ constexpr uint8_t turn_speed = 65;
 constexpr uint8_t max_speed = 255;
 constexpr int16_t reverse_speed = -100;
 
-constexpr uint8_t right_offset = 0;
+constexpr uint8_t right_offset = 45;
 constexpr uint8_t left_offset = 0;
 
 constexpr bool sign(int x) {
@@ -129,7 +129,7 @@ void set_motors(uint8_t right_speed, uint8_t right_back_speed, uint8_t left_spee
 }
 
 void right_turn() {
-  set_motors(0, turn_speed, turn_speed, 0);
+  set_motors(0, turn_speed + right_offset, turn_speed + left_offset, 0);
 
   while (GamePad.isRightPressed()) {
     Dabble.processInput();
@@ -185,7 +185,7 @@ void right_turn() {
 }
 
 void left_turn() {
-  set_motors(turn_speed, 0, 0, turn_speed);
+  set_motors(turn_speed + right_offset, 0, 0, turn_speed + left_offset);
 
   while (GamePad.isLeftPressed()) {
     Dabble.processInput();
