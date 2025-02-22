@@ -1,7 +1,7 @@
-constexpr uint8_t left_back = 5;
-constexpr uint8_t left = 6;
-constexpr uint8_t right_back = 9;
-constexpr uint8_t right = 10;
+constexpr uint8_t left_back = 10;
+constexpr uint8_t left = 9;
+constexpr uint8_t right_back = 6;
+constexpr uint8_t right = 5;
 
 constexpr uint8_t indicator_right = 4;
 constexpr uint8_t indicator_left = 8;
@@ -10,12 +10,14 @@ constexpr uint8_t right_light = A4;
 constexpr uint8_t left_light = A5;
 
 constexpr unsigned long indicator_delay = 200;
-constexpr uint8_t turn_speed = 65;
+constexpr uint8_t turn_speed = 100;
 constexpr uint8_t max_speed = 255;
 constexpr int16_t reverse_speed = -100;
 
-constexpr uint8_t right_offset = 45;
-constexpr uint8_t left_offset = 0;
+constexpr uint8_t right_offset = 0;
+constexpr uint8_t left_offset = 10;
+
+constexpr bool motor_test = false;
 
 constexpr bool sign(int x) {
   return ((x) < 0 ? -1 : ((x) > 0 ? 1 : 0));
@@ -27,8 +29,8 @@ constexpr bool sign(int x) {
 
 static bool backlight_status = false;
 static bool frontlight_status = false;
+static bool first_start = true;
 
-void startup();
 void set_speed(int16_t speed);
 void set_motors(uint8_t right_speed, uint8_t right_back_speed, uint8_t left_speed, uint8_t left_back_speed);
 void set_offset();
@@ -40,21 +42,37 @@ void start_indicator();
 void drive(float x, float y);
 
 void setup() {
-  Serial.begin(19200);
-  Dabble.begin(9600);
+  if (first_start) {
+    Serial.begin(19200);
+    Dabble.begin(9600);
 
-  // Motors
-  pinMode(right, OUTPUT);
-  pinMode(right_back, OUTPUT);
-  pinMode(left, OUTPUT);
-  pinMode(left_back, OUTPUT);
+    // Motors
+    pinMode(right, OUTPUT);
+    pinMode(right_back, OUTPUT);
+    pinMode(left, OUTPUT);
+    pinMode(left_back, OUTPUT);
 
-  // light
-  pinMode(indicator_right, OUTPUT);
-  pinMode(indicator_left, OUTPUT);
-  pinMode(backlight, OUTPUT);
-  pinMode(right_light, OUTPUT);
-  pinMode(left_light, OUTPUT);
+    // light
+    pinMode(indicator_right, OUTPUT);
+    pinMode(indicator_left, OUTPUT);
+    pinMode(backlight, OUTPUT);
+    pinMode(right_light, OUTPUT);
+    pinMode(left_light, OUTPUT);
+
+    first_start = false;
+  };
+
+  if (motor_test) {
+    set_motors(255, 0, 0, 0);
+    delay(2000);
+    set_motors(0, 255, 0, 0);
+    delay(2000);
+    set_motors(0, 0, 255, 0);
+    delay(2000);
+    set_motors(0, 0, 0, 255);
+    delay(2000);
+    set_motors(0, 0, 0, 0);
+  }
 
   Dabble.processInput();
   while (!GamePad.isStartPressed()) {
@@ -71,7 +89,7 @@ void loop() {
   } else if (GamePad.isUpPressed()) {
     set_speed(max_speed);
   } else if (GamePad.isDownPressed()) {
-    set_speed(max_speed);
+    set_speed(-max_speed);
   } else if (GamePad.isLeftPressed()) {
     digitalWrite(left_light, LOW);
     left_turn();
@@ -81,6 +99,7 @@ void loop() {
     right_turn();
     update_light();
   } else if (GamePad.isCrossPressed()) {
+    setup();
   } else if (GamePad.isCirclePressed()) {
     backlight_status = !backlight_status;
     frontlight_status = !frontlight_status;
@@ -89,25 +108,15 @@ void loop() {
   } else if (GamePad.isTrianglePressed()) {
     alert_indicator();
   } else if (GamePad.isSquarePressed()) {
-    set_speed(-100);
-    delay(300);
+    set_speed(reverse_speed);
+    while (GamePad.isSquarePressed()) {
+      Dabble.processInput();
+    }
     set_speed(0);
   } else if (GamePad.isStartPressed()) {
   } else if (GamePad.isSelectPressed()) {
   } else {
     set_speed(0);
-  }
-}
-
-void startup() {
-  delay(300);
-  for (int i = 0; i < 5; i++) {
-    frontlight_status = !frontlight_status;
-    update_light();
-    delay(200);
-    frontlight_status = !frontlight_status;
-    update_light();
-    delay(200);
   }
 }
 
@@ -281,6 +290,7 @@ void start_indicator() {
   delay(indicator_delay);
 }
 
+// [WIP] using the dabble gamepad joystick
 void drive(float x, float y) {
   int speed = map(abs(x) * 100, 0, 700, 0, 255);
   int steering = map(abs(x) * 100, 0, 700, 0, 255);
