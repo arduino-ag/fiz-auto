@@ -19,8 +19,9 @@ constexpr uint8_t left_offset = 10;
 
 constexpr bool motor_test = false;
 
-constexpr bool sign(int x) {
-  return ((x) < 0 ? -1 : ((x) > 0 ? 1 : 0));
+constexpr bool sign(int x)
+{
+    return ((x) < 0 ? -1 : ((x) > 0 ? 1 : 0));
 }
 
 #define CUSTOM_SETTINGS
@@ -41,228 +42,244 @@ void alert_indicator();
 void start_indicator();
 void drive(float x, float y);
 
-void setup() {
-  if (first_start) {
-    Serial.begin(19200);
-    Dabble.begin(9600);
+void setup()
+{
+    if (first_start)
+    {
+        Serial.begin(19200);
+        Dabble.begin(9600);
 
-    // Motors
-    pinMode(right, OUTPUT);
-    pinMode(right_back, OUTPUT);
-    pinMode(left, OUTPUT);
-    pinMode(left_back, OUTPUT);
+        // Motors
+        pinMode(right, OUTPUT);
+        pinMode(right_back, OUTPUT);
+        pinMode(left, OUTPUT);
+        pinMode(left_back, OUTPUT);
 
-    // light
-    pinMode(indicator_right, OUTPUT);
-    pinMode(indicator_left, OUTPUT);
-    pinMode(backlight, OUTPUT);
-    pinMode(right_light, OUTPUT);
-    pinMode(left_light, OUTPUT);
+        // light
+        pinMode(indicator_right, OUTPUT);
+        pinMode(indicator_left, OUTPUT);
+        pinMode(backlight, OUTPUT);
+        pinMode(right_light, OUTPUT);
+        pinMode(left_light, OUTPUT);
 
-    first_start = false;
-  };
+        first_start = false;
+    };
 
-  if (motor_test) {
-    set_motors(255, 0, 0, 0);
-    delay(2000);
-    set_motors(0, 255, 0, 0);
-    delay(2000);
-    set_motors(0, 0, 255, 0);
-    delay(2000);
-    set_motors(0, 0, 0, 255);
-    delay(2000);
-    set_motors(0, 0, 0, 0);
-  }
-
-  Dabble.processInput();
-  while (!GamePad.isStartPressed()) {
-    Dabble.processInput();
-    start_indicator();
-  }
-}
-
-void loop() {
-  Dabble.processInput();
-
-  if (GamePad.getXaxisData() != 0.0 || GamePad.getYaxisData() != 0.0) {
-    drive(GamePad.getYaxisData(), GamePad.getXaxisData());
-  } else if (GamePad.isUpPressed()) {
-    set_speed(max_speed);
-  } else if (GamePad.isDownPressed()) {
-    set_speed(-max_speed);
-  } else if (GamePad.isLeftPressed()) {
-    digitalWrite(left_light, LOW);
-    left_turn();
-    update_light();
-  } else if (GamePad.isRightPressed()) {
-    digitalWrite(right_light, LOW);
-    right_turn();
-    update_light();
-  } else if (GamePad.isCrossPressed()) {
-    setup();
-  } else if (GamePad.isCirclePressed()) {
-    backlight_status = !backlight_status;
-    frontlight_status = !frontlight_status;
-    update_light();
-    delay(300);
-  } else if (GamePad.isTrianglePressed()) {
-    alert_indicator();
-  } else if (GamePad.isSquarePressed()) {
-    set_speed(reverse_speed);
-    while (GamePad.isSquarePressed()) {
-      Dabble.processInput();
-    }
-    set_speed(0);
-  } else if (GamePad.isStartPressed()) {
-  } else if (GamePad.isSelectPressed()) {
-  } else {
-    set_speed(0);
-  }
-}
-
-void set_speed(int16_t speed) {
-  if (speed < 0) {
-    set_motors(0, abs(speed), 0, abs(speed));
-  } else if (speed > 0) {
-    set_motors(speed, 0, speed, 0);
-  } else {
-    set_motors(0, 0, 0, 0);
-  }
-}
-
-void set_motors(uint8_t right_speed, uint8_t right_back_speed, uint8_t left_speed, uint8_t left_back_speed) {
-  analogWrite(right, right_speed);
-  analogWrite(right_back, right_back_speed);
-  analogWrite(left, left_speed);
-  analogWrite(left_back, left_back_speed);
-}
-
-void right_turn() {
-  set_motors(0, turn_speed + right_offset, turn_speed + left_offset, 0);
-
-  while (GamePad.isRightPressed()) {
-    Dabble.processInput();
-    if (!GamePad.isRightPressed())
-      break;
-
-    digitalWrite(indicator_right, HIGH);
-
-    delay(indicator_delay / 4);
-    Dabble.processInput();
-    if (!GamePad.isRightPressed())
-      break;
-
-    delay(indicator_delay / 4);
-    Dabble.processInput();
-    if (!GamePad.isRightPressed())
-      break;
-
-    delay(indicator_delay / 4);
-    Dabble.processInput();
-    if (!GamePad.isRightPressed())
-      break;
-
-    delay(indicator_delay / 4);
-    Dabble.processInput();
-    if (!GamePad.isRightPressed())
-      break;
-
-    digitalWrite(indicator_right, LOW);
-
-    delay(indicator_delay / 4);
-    Dabble.processInput();
-    if (!GamePad.isRightPressed())
-      break;
-
-    delay(indicator_delay / 4);
-    Dabble.processInput();
-    if (!GamePad.isRightPressed())
-      break;
-
-    delay(indicator_delay / 4);
-    Dabble.processInput();
-    if (!GamePad.isRightPressed())
-      break;
-
-    delay(indicator_delay / 4);
-    Dabble.processInput();
-    if (!GamePad.isRightPressed())
-      break;
-  }
-
-  digitalWrite(indicator_right, LOW);
-}
-
-void left_turn() {
-  set_motors(turn_speed + right_offset, 0, 0, turn_speed + left_offset);
-
-  while (GamePad.isLeftPressed()) {
-    Dabble.processInput();
-    if (!GamePad.isLeftPressed())
-      break;
-
-    digitalWrite(indicator_left, HIGH);
-
-    delay(indicator_delay / 4);
-    Dabble.processInput();
-    if (!GamePad.isLeftPressed())
-      break;
-
-    delay(indicator_delay / 4);
-    Dabble.processInput();
-    if (!GamePad.isLeftPressed())
-      break;
-
-    delay(indicator_delay / 4);
-    Dabble.processInput();
-    if (!GamePad.isLeftPressed())
-      break;
-
-    delay(indicator_delay / 4);
-    Dabble.processInput();
-    if (!GamePad.isLeftPressed())
-      break;
-
-    digitalWrite(indicator_left, LOW);
-
-    delay(indicator_delay / 4);
-    Dabble.processInput();
-    if (!GamePad.isLeftPressed())
-      break;
-
-    delay(indicator_delay / 4);
-    Dabble.processInput();
-    if (!GamePad.isLeftPressed())
-      break;
-
-    delay(indicator_delay / 4);
-    Dabble.processInput();
-    if (!GamePad.isLeftPressed())
-      break;
-
-    delay(indicator_delay / 4);
-    Dabble.processInput();
-    if (!GamePad.isLeftPressed())
-      break;
-  }
-
-  digitalWrite(indicator_left, LOW);
-}
-
-void update_light() {
-  digitalWrite(backlight, backlight_status);
-
-  digitalWrite(left_light, frontlight_status);
-  digitalWrite(right_light, frontlight_status);
-}
-
-void alert_indicator() {
-  while (GamePad.isTrianglePressed()) {
-    if (frontlight_status) {
-      digitalWrite(left_light, LOW);
-      digitalWrite(right_light, LOW);
+    if (motor_test)
+    {
+        set_motors(255, 0, 0, 0);
+        delay(2000);
+        set_motors(0, 255, 0, 0);
+        delay(2000);
+        set_motors(0, 0, 255, 0);
+        delay(2000);
+        set_motors(0, 0, 0, 255);
+        delay(2000);
+        set_motors(0, 0, 0, 0);
     }
 
+    Dabble.processInput();
+    while (!GamePad.isStartPressed())
+    {
+        Dabble.processInput();
+        start_indicator();
+    }
+}
+
+void loop()
+{
+    Dabble.processInput();
+
+    if (GamePad.getXaxisData() != 0.0 || GamePad.getYaxisData() != 0.0)
+    {
+        drive(GamePad.getYaxisData(), GamePad.getXaxisData());
+    }
+    else if (GamePad.isUpPressed())
+    {
+        set_speed(max_speed);
+    }
+    else if (GamePad.isDownPressed())
+    {
+        set_speed(-max_speed);
+    }
+    else if (GamePad.isLeftPressed())
+    {
+        digitalWrite(left_light, LOW);
+        left_turn();
+        update_light();
+    }
+    else if (GamePad.isRightPressed())
+    {
+        digitalWrite(right_light, LOW);
+        right_turn();
+        update_light();
+    }
+    else if (GamePad.isCrossPressed())
+    {
+        setup();
+    }
+    else if (GamePad.isCirclePressed())
+    {
+        backlight_status = !backlight_status;
+        frontlight_status = !frontlight_status;
+        update_light();
+        delay(300);
+    }
+    else if (GamePad.isTrianglePressed())
+    {
+        alert_indicator();
+    }
+    else if (GamePad.isSquarePressed())
+    {
+        set_speed(reverse_speed);
+        while (GamePad.isSquarePressed())
+        {
+            Dabble.processInput();
+        }
+        set_speed(0);
+    }
+    else if (GamePad.isStartPressed())
+    {
+    }
+    else if (GamePad.isSelectPressed())
+    {
+    }
+    else
+    {
+        set_speed(0);
+    }
+}
+
+void set_speed(int16_t speed)
+{
+    if (speed < 0)
+    {
+        set_motors(0, abs(speed), 0, abs(speed));
+    }
+    else if (speed > 0)
+    {
+        set_motors(speed, 0, speed, 0);
+    }
+    else
+    {
+        set_motors(0, 0, 0, 0);
+    }
+}
+
+void set_motors(uint8_t right_speed, uint8_t right_back_speed, uint8_t left_speed, uint8_t left_back_speed)
+{
+    analogWrite(right, right_speed);
+    analogWrite(right_back, right_back_speed);
+    analogWrite(left, left_speed);
+    analogWrite(left_back, left_back_speed);
+}
+
+void right_turn()
+{
+    set_motors(0, turn_speed + right_offset, turn_speed + left_offset, 0);
+
+    while (GamePad.isRightPressed())
+    {
+        Dabble.processInput();
+        if (!GamePad.isRightPressed())
+            break;
+
+        digitalWrite(indicator_right, HIGH);
+
+        for (size_t i = 0; i < 4; i++)
+        {
+            delay(indicator_delay / 4);
+            Dabble.processInput();
+            if (!GamePad.isRightPressed())
+                break;
+        }
+
+        digitalWrite(indicator_right, LOW);
+
+        for (size_t i = 0; i < 4; i++)
+        {
+            delay(indicator_delay / 4);
+            Dabble.processInput();
+            if (!GamePad.isRightPressed())
+                break;
+        }
+    }
+
+    digitalWrite(indicator_right, LOW);
+}
+
+void left_turn()
+{
+    set_motors(turn_speed + right_offset, 0, 0, turn_speed + left_offset);
+
+    while (GamePad.isLeftPressed())
+    {
+        Dabble.processInput();
+        if (!GamePad.isLeftPressed())
+            break;
+
+        digitalWrite(indicator_left, HIGH);
+
+        for (size_t i = 0; i < 4; i++)
+        {
+            delay(indicator_delay / 4);
+            Dabble.processInput();
+            if (!GamePad.isLeftPressed())
+                break;
+        }
+
+        digitalWrite(indicator_left, LOW);
+
+        for (size_t i = 0; i < 4; i++)
+        {
+            delay(indicator_delay / 4);
+            Dabble.processInput();
+            if (!GamePad.isLeftPressed())
+                break;
+        }
+    }
+
+    digitalWrite(indicator_left, LOW);
+}
+
+void update_light()
+{
+    digitalWrite(backlight, backlight_status);
+
+    digitalWrite(left_light, frontlight_status);
+    digitalWrite(right_light, frontlight_status);
+}
+
+void alert_indicator()
+{
+    while (GamePad.isTrianglePressed())
+    {
+        if (frontlight_status)
+        {
+            digitalWrite(left_light, LOW);
+            digitalWrite(right_light, LOW);
+        }
+
+        delay(indicator_delay);
+        digitalWrite(indicator_left, HIGH);
+        digitalWrite(indicator_right, HIGH);
+        delay(indicator_delay);
+        digitalWrite(indicator_left, LOW);
+        digitalWrite(indicator_right, LOW);
+        delay(indicator_delay);
+
+        Dabble.processInput();
+    }
+
+    if (frontlight_status)
+    {
+        digitalWrite(right_light, HIGH);
+        digitalWrite(left_light, HIGH);
+    }
+}
+
+void start_indicator()
+{
     delay(indicator_delay);
     digitalWrite(indicator_left, HIGH);
     digitalWrite(indicator_right, HIGH);
@@ -270,48 +287,46 @@ void alert_indicator() {
     digitalWrite(indicator_left, LOW);
     digitalWrite(indicator_right, LOW);
     delay(indicator_delay);
-
-    Dabble.processInput();
-  }
-
-  if (frontlight_status) {
-    digitalWrite(right_light, HIGH);
-    digitalWrite(left_light, HIGH);
-  }
-}
-
-void start_indicator() {
-  delay(indicator_delay);
-  digitalWrite(indicator_left, HIGH);
-  digitalWrite(indicator_right, HIGH);
-  delay(indicator_delay);
-  digitalWrite(indicator_left, LOW);
-  digitalWrite(indicator_right, LOW);
-  delay(indicator_delay);
 }
 
 // [WIP] using the dabble gamepad joystick
-void drive(float x, float y) {
-  int speed = map(abs(x) * 100, 0, 700, 0, 255);
-  int steering = map(abs(x) * 100, 0, 700, 0, 255);
+void drive(float x, float y)
+{
+    int speed = map(abs(x) * 100, 0, 700, 0, 255);
+    int steering = map(abs(x) * 100, 0, 700, 0, 255);
 
-  if (sign(x) == -1) {
-    if (y == 0.0) {
-      set_motors(0, speed, 0, speed);
-    } else if (sign(y) == -1) {
-      set_motors(0, speed - steering, 0, speed);
-    } else if (sign(y) == 1) {
-      set_motors(0, speed, 0, speed - steering);
+    if (sign(x) == -1)
+    {
+        if (y == 0.0)
+        {
+            set_motors(0, speed, 0, speed);
+        }
+        else if (sign(y) == -1)
+        {
+            set_motors(0, speed - steering, 0, speed);
+        }
+        else if (sign(y) == 1)
+        {
+            set_motors(0, speed, 0, speed - steering);
+        }
     }
-  } else if (sign(x) == 1) {
-    if (y == 0.0) {
-      set_motors(speed, 0, speed, 0);
-    } else if (sign(y) == -1) {
-      set_motors(speed - steering, 0, speed, 0);
-    } else if (sign(y) == 1) {
-      set_motors(speed, 0, speed - steering, 0);
+    else if (sign(x) == 1)
+    {
+        if (y == 0.0)
+        {
+            set_motors(speed, 0, speed, 0);
+        }
+        else if (sign(y) == -1)
+        {
+            set_motors(speed - steering, 0, speed, 0);
+        }
+        else if (sign(y) == 1)
+        {
+            set_motors(speed, 0, speed - steering, 0);
+        }
     }
-  } else {
-    set_speed(0);
-  }
+    else
+    {
+        set_speed(0);
+    }
 }
